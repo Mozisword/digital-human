@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+httpx
+edge-tts
+python-multipart
+piper-tts
+g2pw
+# 自定义音色（语音克隆）：coqui-tts==0.27.5 (idiap fork) 提供纯 Python wheel，
+# 支持 Windows / Mac，Python >=3.10
+coqui-tts==0.27.5
+librosa
