@@ -1,0 +1,167 @@
+:root {
+  --bg: #f4f6fb;
+  --card: #ffffff;
+  --ink: #1f2433;
+  --muted: #6b7280;
+  --primary: #4f46e5;
+  --primary-soft: #eef0ff;
+  --user: #4f46e5;
+  --bot: #f1f3f9;
+  --line: #e6e8ef;
+  --danger: #dc2626;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo { font-size: 30px; }
+.topbar h1 { font-size: 18px; margin: 0; }
+.sub { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+
+.layout {
+  display: grid;
+  grid-template-columns: 500px 1fr;
+  gap: 20px;
+  padding: 20px;
+  height: calc(100vh - 66px);
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px;
+}
+
+/* 头像面板 */
+.avatar-panel {
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+}
+.avatar-wrap { position: relative; width: 100%; display: flex; justify-content: center; }
+#avatar {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  border-radius: 16px;
+  background: var(--primary-soft);
+  box-shadow: 0 10px 30px rgba(79,70,229,0.18);
+}
+.speak-badge {
+  position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+  background: rgba(79,70,229,0.92); color: #fff; font-size: 12px;
+  padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+}
+
+.upload-btn {
+  width: 100%; text-align: center;
+  background: var(--primary); color: #fff;
+  padding: 12px; border-radius: 12px; cursor: pointer; font-size: 14px;
+  transition: filter .15s;
+}
+.upload-btn:hover { filter: brightness(1.05); }
+
+.top-actions { display: flex; gap: 8px; }
+.rec-badge {
+  position: absolute; left: 50%; top: 8px; transform: translateX(-50%);
+  background: rgba(220,38,38,0.92); color: #fff; font-size: 11px; font-weight: 700;
+  padding: 3px 9px; border-radius: 999px; letter-spacing: .5px;
+  animation: blink 1s steps(2, start) infinite;
+}
+@keyframes blink { 50% { opacity: .35; } }
+
+.lyrics-box {
+  width: 100%; min-height: 40px; text-align: center;
+  font-size: 15px; color: var(--primary); padding: 8px 10px;
+  background: var(--primary-soft); border-radius: 12px;
+  font-weight: 600; word-break: break-word;
+}
+
+.voice-controls { display: flex; gap: 12px; align-items: center; width: 100%; }
+.voice-btn {
+  flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--line);
+  background: #fff; cursor: pointer; font-size: 14px;
+}
+.voice-btn.recording { background: #fee2e2; border-color: var(--danger); color: var(--danger); }
+.switch { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.status { font-size: 12px; color: var(--muted); margin: 0; min-height: 16px; }
+
+/* 对话面板 */
+.chat-panel { display: flex; flex-direction: column; min-height: 0; }
+.messages { flex: 1; overflow-y: auto; padding-right: 6px; display: flex; flex-direction: column; gap: 12px; }
+.msg { max-width: 80%; padding: 10px 14px; border-radius: 14px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+.msg.user { align-self: flex-end; background: var(--user); color: #fff; border-bottom-right-radius: 4px; }
+.msg.bot { align-self: flex-start; background: var(--bot); border-bottom-left-radius: 4px; }
+.msg.err { align-self: flex-start; background: #fef2f2; color: var(--danger); }
+
+.composer { display: flex; gap: 10px; margin-top: 12px; }
+#input {
+  flex: 1; resize: none; padding: 12px; border-radius: 12px;
+  border: 1px solid var(--line); font-size: 14px; font-family: inherit;
+}
+.send-btn {
+  padding: 0 22px; border: none; border-radius: 12px; background: var(--primary);
+  color: #fff; cursor: pointer; font-size: 14px;
+}
+.send-btn:disabled { opacity: .5; cursor: default; }
+
+/* 设置弹窗 */
+.modal {
+  position: fixed; inset: 0; background: rgba(15,18,30,0.45);
+  display: flex; align-items: center; justify-content: center; z-index: 50;
+}
+.modal-card {
+  width: 440px; max-width: 92vw; max-height: 88vh; overflow-y: auto;
+  background: #fff; border-radius: 16px; padding: 20px;
+}
+.modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.modal-head h2 { font-size: 16px; margin: 0; }
+.field { margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 13px; color: var(--muted); }
+.field input { padding: 10px; border: 1px solid var(--line); border-radius: 10px; font-size: 14px; }
+.field small { color: var(--muted); font-size: 11px; }
+.radio-row { display: flex; gap: 18px; }
+.modal-actions { display: flex; justify-content: flex-end; }
+.ghost-btn { border: none; background: transparent; cursor: pointer; font-size: 14px; color: var(--muted); }
+.engine-box { border: 1px dashed var(--line); border-radius: 12px; padding: 12px; margin-bottom: 14px; }
+
+/* 歌库弹窗 */
+.modal-card.wide { width: 560px; }
+.song-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+.song-tabs .tab {
+  border: 1px solid var(--line); background: #fff; padding: 7px 14px;
+  border-radius: 10px; cursor: pointer; font-size: 13px;
+}
+.song-tabs .tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.song-list { display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto; }
+.song-list .empty { color: var(--muted); font-size: 13px; text-align: center; padding: 20px; }
+.song-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px;
+}
+.song-meta { min-width: 0; }
+.song-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.song-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.song-acts { display: flex; gap: 6px; flex-shrink: 0; }
+.mini {
+  border: 1px solid var(--line); background: #fff; border-radius: 8px;
+  padding: 6px 10px; font-size: 12px; cursor: pointer;
+}
+.mini.sing { background: var(--primary); color: #fff; border-color: var(--primary); }
+.mini.del { color: var(--danger); border-color: #f3c4c4; }
+.field .row2 { display: flex; gap: 8px; }
+.field .row2 input { flex: 1; }
+hr { border: none; border-top: 1px dashed var(--line); margin: 16px 0; }
+
+.hidden { display: none !important; }
