@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>数字人对话系统</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">🧑‍💻</span>
+      <div>
+        <h1>数字人对话系统</h1>
+        <p class="sub">上传照片 · 本地 Ollama / 在线 API · 文字 + 语音 + 唱歌</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button id="songBtn" class="ghost-btn">🎵 歌库</button>
+      <button id="recordBtn" class="ghost-btn">🎬 录制视频</button>
+      <button id="settingsBtn" class="ghost-btn">⚙️ 设置</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- 数字人面板 -->
+    <section class="avatar-panel card">
+      <div class="avatar-wrap">
+        <canvas id="avatar" width="480" height="640"></canvas>
+        <div id="speakBadge" class="speak-badge hidden">🔊 正在说话…</div>
+        <div id="recBadge" class="rec-badge hidden">● REC</div>
+      </div>
+
+      <label class="upload-btn">
+        📷 上传照片生成数字人
+        <input id="photoInput" type="file" accept="image/*" hidden />
+      </label>
+
+      <div class="voice-controls">
+        <button id="micBtn" class="voice-btn" title="按住说话（语音输入）">🎤 语音输入</button>
+        <label class="switch">
+          <input id="ttsToggle" type="checkbox" checked />
+          <span>语音播报</span>
+        </label>
+      </div>
+
+      <div id="lyricsBox" class="lyrics-box hidden"></div>
+      <p id="status" class="status">就绪</p>
+    </section>
+
+    <!-- 对话面板 -->
+    <section class="chat-panel card">
+      <div id="messages" class="messages"></div>
+      <div class="composer">
+        <textarea id="input" rows="2" placeholder="输入消息，或点左侧🎤说话…（输入 /sing 歌名 让数字人唱歌）"></textarea>
+        <button id="sendBtn" class="send-btn">发送</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- 设置弹窗 -->
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>模型与语音设置</h2>
+        <button id="closeSettings" class="ghost-btn">✕</button>
+      </div>
+
+      <div class="field">
+        <label>对话引擎</label>
+        <div class="radio-row">
+          <label><input type="radio" name="provider" value="ollama" /> 本地 Ollama</label>
+          <label><input type="radio" name="provider" value="openai" /> 在线 API</label>
+        </div>
+      </div>
+
+      <div id="ollamaBox" class="engine-box">
+        <div class="field">
+          <label>Ollama 地址</label>
+          <input id="ollamaUrl" type="text" placeholder="http://localhost:11434" />
+        </div>
+        <div class="field">
+          <label>模型名（输入或从列表选择）</label>
+          <input id="ollamaModel" type="text" placeholder="llama3" list="ollamaModels" />
+          <datalist id="ollamaModels"></datalist>
+          <small>点此自动获取：<a href="javascript:void(0)" id="fetchModels">刷新本地模型列表</a></small>
+        </div>
+      </div>
+
+      <div id="openaiBox" class="engine-box hidden">
+        <div class="field">
+          <label>API Base URL（OpenAI 兼容）</label>
+          <input id="apiBase" type="text" placeholder="https://api.openai.com/v1" />
+        </div>
+        <div class="field">
+          <label>API Key</label>
+          <input id="apiKey" type="password" placeholder="sk-..." />
+        </div>
+        <div class="field">
+          <label>模型名</label>
+          <input id="apiModel" type="text" placeholder="gpt-3.5-turbo" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>TTS 引擎</label>
+        <div class="radio-row">
+          <label><input type="radio" name="ttsEngine" value="edge-tts" /> 在线 edge-tts</label>
+          <label><input type="radio" name="ttsEngine" value="piper" /> 离线 Piper</label>
+          <label><input type="radio" name="ttsEngine" value="custom" /> 自定义音色</label>
+        </div>
+        <small id="piperHint">离线引擎需先下载中文语音模型（约 40MB，仅首次需联网）。</small>
+      </div>
+
+      <div id="edgeTtsBox" class="engine-box">
+        <div class="field">
+          <label>edge-tts 发音人</label>
+          <input id="ttsVoice" type="text" placeholder="zh-CN-XiaoxiaoNeural" />
+          <small>常用：zh-CN-XiaoxiaoNeural / zh-CN-YunxiNeural / zh-CN-XiaoyiNeural</small>
+        </div>
+      </div>
+
+      <div id="piperBox" class="engine-box hidden">
+        <div class="field">
+          <label>离线中文音色</label>
+          <select id="piperVoice"></select>
+        </div>
+        <button id="piperInstallBtn" class="send-btn" type="button">⬇️ 下载离线语音模型</button>
+        <p id="piperStatus" class="status"></p>
+      </div>
+
+      <div id="customBox" class="engine-box hidden">
+        <div class="field">
+          <label>当前使用的自定义音色</label>
+          <select id="customVoice"></select>
+        </div>
+        <button id="xttsInstallBtn" class="send-btn" type="button">⬇️ 下载语音克隆模型 (XTTS)</button>
+        <p id="xttsStatus" class="status"></p>
+        <hr />
+        <div class="field">
+          <label>上传新的音色样本（建议 10~30 秒清晰人声）</label>
+          <small>模型会学习该音色，之后所有语音都用它说话。仅本地使用，不上传。</small>
+          <input id="voiceFile" type="file" accept="audio/*" />
+          <div class="row2">
+            <input id="voiceName" type="text" placeholder="音色名称（如：张三）" />
+            <select id="voiceLang">
+              <option value="zh">中文</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+          <button id="uploadVoiceBtn" class="send-btn" type="button">⬆️ 上传音色</button>
+        </div>
+        <div id="customVoiceList" class="song-list"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button id="saveSettings" class="send-btn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 歌库弹窗 -->
+  <div id="songModal" class="modal hidden">
+    <div class="modal-card wide">
+      <div class="modal-head">
+        <h2>🎵 歌库（指挥数字人唱歌）</h2>
+        <button id="closeSongs" class="ghost-btn">✕</button>
+      </div>
+
+      <div class="song-tabs">
+        <button class="tab active" data-tab="lib">我的歌库</button>
+        <button class="tab" data-tab="add">上传/添加</button>
+      </div>
+
+      <div id="tabLib" class="tab-pane">
+        <div id="songList" class="song-list">
+          <p class="empty">歌库为空，去“上传/添加”里加歌吧～</p>
+        </div>
+      </div>
+
+      <div id="tabAdd" class="tab-pane hidden">
+        <div class="field">
+          <label>上传本地歌曲（音频 + 可选歌词 LRC）</label>
+          <input id="songFile" type="file" accept="audio/*" />
+          <input id="lyricsFile" type="file" accept=".lrc,.txt" />
+          <div class="row2">
+            <input id="songTitle" type="text" placeholder="歌名（可选）" />
+            <input id="songArtist" type="text" placeholder="歌手（可选）" />
+          </div>
+          <button id="uploadSongBtn" class="send-btn" type="button">⬆️ 上传到歌库</button>
+        </div>
+        <hr />
+        <div class="field">
+          <label>添加在线歌曲（填写直链音频 URL）</label>
+          <small>支持任意可直链播放的 mp3/ogg 等；请确认你有相应授权。</small>
+          <input id="onlineTitle" type="text" placeholder="歌名" />
+          <input id="onlineUrl" type="text" placeholder="https://.../song.mp3" />
+          <button id="addOnlineBtn" class="send-btn" type="button">➕ 添加在线歌曲</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
